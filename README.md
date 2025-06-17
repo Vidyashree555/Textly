@@ -1,1 +1,5 @@
-# Spring-Textly
+<<<<<<< HEAD
+hello world
+=======
+# Textly
+>>>>>>> d16074a (Initial commit)
