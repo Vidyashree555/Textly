@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Share</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --hover-color: #2575fc;
+            --gradient-start: #1a1a2e;
+            --gradient-end: #16213e;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+            --text-color: #e6e6e6;
+            --secondary-bg: #0f3460;
+            --border-color: #2d4059;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            box-shadow: var(--box-shadow);
+            border-radius: 12px;
+            transition: all var(--transition-speed) ease-in-out;
+            transform: translateY(0);
+            border: 1px solid var(--border-color);
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            position: relative;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            transform: translateX(-50%);
+            transition: width var(--transition-speed) ease;
+        }
+
+        h1:hover::after {
+            width: 150px;
+        }
+
+        /* Tab styling */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        .tab.active {
+            background: linear-gradient(145deg, #6a11cb, #2575fc);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 -2px 10px rgba(106, 17, 203, 0.5);
+        }
+
+        .tab:hover:not(.active) {
+            background: linear-gradient(145deg, #2a2a3e, #26264e);
+            transform: translateY(-3px);
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .tab:hover::before {
+            transform: translateX(0);
+        }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all var(--transition-speed);
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all var(--transition-speed);
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all var(--transition-speed);
+            background: rgba(15, 52, 96, 0.5);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            color: var(--text-color);
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.5);
+            transform: translateY(-2px);
+            background: rgba(15, 52, 96, 0.8);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            color: var(--text-color);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+            transition: all var(--transition-speed);
+        }
+
+        .file-input-button:hover {
+            background: linear-gradient(145deg, #2a2a3e, #26264e);
+            border-color: var(--primary-color);
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-style: italic;
+            color: #aaa;
+        }
+
+        button {
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #2575fc, #6a11cb);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.5);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+            z-index: -1;
+        }
+
+        button:focus::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .divider {
+            text-align: center;
+            margin: 40px 0 20px;
+            font-weight: bold;
+            color: #aaa;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #6a11cb, transparent);
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .message {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            animation: slideDown 0.5s ease-out;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .message.success {
+            color: #e6e6ff;
+            background: linear-gradient(145deg, #4a1e8a, #3a4a8a, #4a1e8a);
+            border: 1px solid #5a2e9a;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message.success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: all 0.6s ease;
+        }
+
+        .message.success:hover::before {
+            left: 100%;
+        }
+        .message.error {
+            color: #f8d7da;
+            background: linear-gradient(145deg, #4a1e29, #612a36);
+            border: 1px solid #612a36;
+        }
+
+        /* Loader animation */
+        .loader {
+            display: none;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #6a11cb;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--box-shadow);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate__animated animate__fadeIn">
+        <h1 class="animate__animated animate__fadeInDown">Text Share Application</h1>
+
+        <!-- Display success message -->
+        <div th:if="${success}" class="message success animate__animated animate__bounceIn">
+            <p th:text="${success}"></p>
+        </div>
+
+        <!-- Display error message -->
+        <div th:if="${error}" class="message error animate__animated animate__shakeX">
+            <p th:text="${error}"></p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('text-tab')">
+                <i class="tab-icon">📝</i> Text Sharing
+            </div>
+            <div class="tab" onclick="openTab('file-tab')">
+                <i class="tab-icon">📁</i> File Transfer
+            </div>
+        </div>
+
+        <!-- Text Tab Content -->
+        <div id="text-tab" class="tab-content active">
+            <!-- Share Message -->
+            <form action="/save" method="post" id="text-form">
+                <textarea name="content" placeholder="Write your message here..." required class="animate__animated animate__fadeIn"></textarea>
+                <button type="submit" class="submit-btn">
+                    Share Message
+                    <span class="loader" id="text-loader"></span>
+                </button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <!-- Enter Code to View Message -->
+            <form action="/view" method="get" id="view-form">
+                <input type="text" name="id" placeholder="Enter your code..." required class="animate__animated animate__fadeIn" />
+                <button type="submit" class="submit-btn">
+                    View Message
+                    <span class="loader" id="view-loader"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- File Tab Content -->
+        <div id="file-tab" class="tab-content">
+            <!-- Upload File -->
+            <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+                <div class="file-input-wrapper">
+                    <div class="file-input-button" id="file-input-label">Choose a file...</div>
+                    <input type="file" name="file" id="file-input" required />
+                </div>
+                <div class="file-name" id="file-name"></div>
+                <button type="submit" class="submit-btn">
+                    Upload File
+                    <span class="loader" id="upload-loader"></span>
+                </button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <!-- Download File -->
+            <form action="/download" method="get" id="download-form">
+                <input type="text" name="fileId" placeholder="Enter file code..." required class="animate__animated animate__fadeIn" />
+                <button type="submit" class="submit-btn">
+                    Download File
+                    <span class="loader" id="download-loader"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function openTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+
+            // Deactivate all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+
+            // Show the selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate the clicked tab
+            event.currentTarget.classList.add('active');
+        }
+
+        // File input customization
+        const fileInput = document.getElementById('file-input');
+        const fileInputLabel = document.getElementById('file-input-label');
+        const fileName = document.getElementById('file-name');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+                fileInputLabel.textContent = 'File selected';
+            } else {
+                fileName.textContent = '';
+                fileInputLabel.textContent = 'Choose a file...';
+            }
+        });
+
+        // Show loading indicators when forms are submitted
+        document.getElementById('text-form').addEventListener('submit', function() {
+            document.getElementById('text-loader').style.display = 'inline-block';
+        });
+
+        document.getElementById('view-form').addEventListener('submit', function() {
+            document.getElementById('view-loader').style.display = 'inline-block';
+        });
+
+        document.getElementById('upload-form').addEventListener('submit', function() {
+            document.getElementById('upload-loader').style.display = 'inline-block';
+        });
+
+        document.getElementById('download-form').addEventListener('submit', function() {
+            document.getElementById('download-loader').style.display = 'inline-block';
+        });
+
+        // Character counter for text area
+        const textarea = document.querySelector('textarea[name="content"]');
+        const charCounter = document.createElement('div');
+        charCounter.className = 'char-counter';
+        charCounter.style.textAlign = 'right';
+        charCounter.style.marginTop = '5px';
+        charCounter.style.fontSize = '0.8rem';
+        charCounter.style.color = '#aaa';
+        
+        textarea.parentNode.insertBefore(charCounter, textarea.nextSibling);
+        
+        textarea.addEventListener('input', function() {
+            const charCount = this.value.length;
+            charCounter.textContent = `${charCount} characters`;
+            
+            if (charCount > 500) {
+                charCounter.style.color = '#ff6b6b';
+            } else {
+                charCounter.style.color = '#aaa';
+            }
+        });
+
+        // Apply animations to elements when they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__fadeIn');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('form, .divider').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

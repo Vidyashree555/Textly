@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Message</title>
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --hover-color: #2575fc;
+            --gradient-start: #1a1a2e;
+            --gradient-end: #16213e;
+            --text-color: #e6e6e6;
+            --border-color: #2d4059;
+            --secondary-bg: rgba(15, 52, 96, 0.5);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            resize: none;
+            background: var(--secondary-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.5);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, var(--hover-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            textarea {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shared Message</h1>
+        <textarea id="messageBox" readonly th:text="${content}">Default shared message if no content is provided.</textarea>
+        <div class="button-container">
+            <button onclick="copyMessage()">Copy Message</button>
+        </div>
+    </div>
+
+    <script>
+        function copyMessage() {
+            const textarea = document.getElementById("messageBox");
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            
+            // Create and show a custom notification
+            const notification = document.createElement('div');
+            notification.textContent = 'Message copied to clipboard!';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = 'rgba(106, 17, 203, 0.9)';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '8px';
+            notification.style.zIndex = '1000';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            notification.style.animation = 'fadeInOut 2.5s ease-in-out';
+            
+            document.body.appendChild(notification);
+            
+            // Remove the notification after animation
+            setTimeout(() => {
+                notification.remove();
+            }, 2500);
+        }
+
+        // Add the animation to the style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
